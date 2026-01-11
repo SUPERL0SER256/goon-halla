@@ -1,4 +1,4 @@
-GOONHALL- aka the gesture counter is a website that i made for avid gooners looking to improve their technique.
+GOONHALLA- aka the gesture counter is a website that i made for avid gooners looking to improve their technique.
 Thus i used Mediapipe( an open source framework for building Ml pipelines form processing real time data like video and audio in real time)
 The user has to move their hand up an down as one does, and the website will track how many times the user does a stroke in a minute. 
 the gesture has to be preciuse and fluid to count, thus improving ones technique as they play.
