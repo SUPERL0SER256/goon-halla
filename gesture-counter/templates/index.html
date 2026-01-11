@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gesture Counter - Test Your Speed!</title>
+    <style>
+        /* 
+        ===================
+        Global Styles
+        ===================
+        Modern, clean interface with gradient background
+        */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', monospace;
+            background: linear-gradient(135deg, #000000 0%, #000000 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* 
+        ===================
+        Main Container
+        ===================
+        Central container holding all content
+        */
+        .container {
+            background: black;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        /* 
+        ===================
+        Header Section
+        ===================
+        */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #e97807;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #b9b9b9;
+            font-size: 1.1em;
+        }
+
+        /* 
+        ===================
+        Video Feed Section
+        ===================
+        Displays live camera feed with hand tracking
+        */
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        #video-feed {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* 
+        ===================
+        Statistics Dashboard
+        ===================
+        Shows real-time count, timer, and performance metrics
+        */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #010101 0%, #000000 100%);
+            color: rgb(233, 120, 7);
+            padding: 25px;
+            border-radius: 0px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        .rank-box {
+            background: linear-gradient(135deg, #1d1d1d 0%, #000000 100%);
+        }
+
+        /* 
+        ===================
+        Control Buttons
+        ===================
+        Start/Stop session controls
+        */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 0px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #e97807 0%, #e97807 100%);
+            color: rgb(0, 0, 0);
+            
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(231, 135, 91, 0.6);
+        }
+
+        .start-btn:active {
+            transform: translateY(0);
+        }
+
+        .start-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 
+        ===================
+        Instructions Panel
+        ===================
+        Help section explaining how to use the app
+        */
+        .instructions {
+            background: #000000;
+            padding: 25px;
+            border-radius: 0px;
+            margin-bottom: 20px;
+        }
+
+        .instructions h2 {
+            color: #b9b9b9;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 1.8;
+            color: #b9b9b9;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        /* 
+        ===================
+        Performance Indicator
+        ===================
+        Visual feedback during session
+        */
+        .performance-indicator {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .performance-indicator.active {
+            background: #474747;
+            color: #000000;
+            border: 2px solid #000000;
+        }
+
+        .performance-indicator.complete {
+            background: #4a4a4a;
+            color: #000000;
+            border: 2px solid #000000;
+        }
+
+        /* 
+        ===================
+        Progress Bar
+        ===================
+        Visual representation of remaining time
+        */
+        .progress-container {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #E97807 0%, #E97807 100%);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgb(0, 0, 0);
+            font-weight: bold;
+        }
+
+        /* 
+        ===================
+        Responsive Design
+        ===================
+        Adjust layout for smaller screens
+        */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .stat-value {
+                font-size: 2em;
+            }
+        }
+
+        /* 
+        ===================
+        Animation Effects
+        ===================
+        Subtle animations for better UX
+        */
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .stat-box.active {
+            animation: pulse 2s infinite;
+        }
+
+        .celebration {
+            animation: pulse 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1> GOONHALLA </h1>
+            <p class="subtitle">This is a test for technique and speed. The most fluid motion is optimal </p>
+        </div>
+
+        <!-- Video Feed - Shows camera with hand tracking overlay -->
+        <div class="video-container">
+            <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed">
+        </div>
+
+        <!-- Progress Bar - Shows remaining time visually -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar" style="width: 100%;">
+                <span id="progress-text">Ready to start!</span>
+            </div>
+        </div>
+
+        <!-- Statistics Dashboard - Real-time metrics -->
+        <div class="stats-container">
+            <div class="stat-box" id="count-box">
+                <div class="stat-label">Gesture Count</div>
+                <div class="stat-value" id="count-display">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Time Remaining</div>
+                <div class="stat-value" id="timer-display">60s</div>
+            </div>
+            <div class="stat-box rank-box">
+                <div class="stat-label">Current Rank</div>
+                <div class="stat-value" id="rank-display">-</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Best Score</div>
+                <div class="stat-value" id="best-display">0</div>
+            </div>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="controls">
+            <button class="start-btn" id="start-btn" onclick="startSession()">
+                Start Session
+            </button>
+        </div>
+
+        <!-- Performance Indicator -->
+        <div class="performance-indicator" id="performance-indicator">
+            Click "Start Session" to begin!
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions">
+            <h2> Objective </h2>
+            <ol>
+                <li><strong>Position yourself:</strong> Make sure your hand is visible in the camera frame</li>
+                <li><strong>Click "Start Session":</strong> This begins the 60-second countdown</li>
+                <li><strong>Move your hand:</strong> Make clear up-and-down movements with your hand</li>
+                <li><strong>Watch the counter:</strong> Each complete up-down cycle adds to your score</li>
+                <li><strong>Get ranked:</strong> Your performance is evaluated at the end!</li>
+            </ol>
+            <p style="margin-top: 15px; color: #b9b9b9;">
+                <strong> Tips:</strong> Keep movements controlled and consistent. Avoid too-fast micro-movements as they may not register. The green dots show your hand is being tracked!
+            </p>
+        </div>
+    </div>
+
+    <script>
+        /*
+        ===========================================
+        JavaScript Client-Side Logic
+        ===========================================
+        Handles UI updates and communication with Flask backend
+        */
+
+        let sessionActive = false;
+        let updateInterval = null;
+        let lastCount = 0;
+
+        /**
+         * Start a new counting session
+         * Sends POST request to backend to initialize session
+         */
+        async function startSession() {
+            try {
+                const response = await fetch('/start_session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'started') {
+                    sessionActive = true;
+                    document.getElementById('start-btn').disabled = true;
+                    document.getElementById('performance-indicator').className = 'performance-indicator active';
+                    document.getElementById('performance-indicator').textContent = 'Session Active! Move your hand!';
+                    
+                    // Start polling for updates every 100ms
+                    updateInterval = setInterval(updateStats, 100);
+                }
+            } catch (error) {
+                console.error('Error starting session:', error);
+                alert('Failed to start session. Please refresh the page.');
+            }
+        }
+
+        /**
+         * Update statistics display
+         * Polls backend for current count, time, and rank
+         */
+        async function updateStats() {
+            try {
+                const response = await fetch('/get_stats');
+                const data = await response.json();
+
+                // Update count display
+                document.getElementById('count-display').textContent = data.count;
+                
+                // Celebrate when count increases
+                if (data.count > lastCount) {
+                    const countBox = document.getElementById('count-box');
+                    countBox.classList.add('celebration');
+                    setTimeout(() => countBox.classList.remove('celebration'), 500);
+                    lastCount = data.count;
+                }
+
+                // Update timer
+                document.getElementById('timer-display').textContent = data.remaining_time + 's';
+
+                // Update progress bar
+                const progressPercent = (data.remaining_time / 60) * 100;
+                const progressBar = document.getElementById('progress-bar');
+                progressBar.style.width = progressPercent + '%';
+                document.getElementById('progress-text').textContent = 
+                    data.remaining_time > 0 ? `${data.remaining_time}s remaining` : 'Complete!';
+
+                // Update rank display
+                document.getElementById('rank-display').textContent = data.rank || '-';
+
+                // Update best score
+                document.getElementById('best-display').textContent = data.best_score;
+
+                // Handle session completion
+                if (!data.session_active && sessionActive) {
+                    sessionActive = false;
+                    clearInterval(updateInterval);
+                    document.getElementById('start-btn').disabled = false;
+                    
+                    // Show completion message
+                    const indicator = document.getElementById('performance-indicator');
+                    indicator.className = 'performance-indicator complete';
+                    indicator.innerHTML = `
+                        Session Complete!<br>
+                        Final Score: ${data.score} gestures<br>
+                        Rank: ${data.rank}
+                    `;
+
+                    // Add active class to count box for emphasis
+                    document.getElementById('count-box').classList.add('active');
+                }
+
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+
+        // Initialize stats display on page load
+        updateStats();
+    </script>
+</body>
+</html>
